@@ -10,6 +10,6 @@ class Chat extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
-        "senderId","receiverId","message","status"
+        "senderId","receiverId","message","status","audio_path"
     ];
 }

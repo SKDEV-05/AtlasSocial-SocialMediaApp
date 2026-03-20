@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, Phone, Video, MoreVertical, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Phone, Video, MoreVertical, Loader2, Mic, Square, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/Components/ui/avatar";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
@@ -9,13 +9,22 @@ import { Card } from "@/Components/ui/card";
 import { ScrollArea } from "@/Components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import audio from "../../../assets/songs/notification.wav";
+import AudioPlayer from "@/Components/AudioPlayer";
 
 export default function Messages({ user, messages, friend }) {
     const [allMessages, setAllMessages] = useState([]);
     const [messageInput, setMessageInput] = useState("");
     const [isSending, setIsSending] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const mediaRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
     const messagesEndRef = useRef(null);
     const scrollAreaRef = useRef(null);
+    const canvasRef = useRef(null);
+    const animationRef = useRef(null);
+    const audioContextRef = useRef(null);
+    const analyserRef = useRef(null);
+    const isCancelledRef = useRef(false);
 
     useEffect(() => {
         setAllMessages(messages);
@@ -28,24 +37,155 @@ export default function Messages({ user, messages, friend }) {
     }, [allMessages]);
 
     useEffect(() => {
-        if (!user?.id) return;
-        const notif = new Audio(audio);
-        
-        window.Echo.private(`chat.${user.id}`)
-            .listen(".chat.send", (e) => {
-                // If message is from the friend we are currently chatting with
-                if (e.message.senderId === friend.id) {
-                    setAllMessages((prev) => [...prev, e.message]);
-                    // Don't play sound if we are already in the conversation with them
-                } else {
-                    // Play sound for messages from OTHER users
-                    notif.play().catch(e => console.log("Audio play failed", e));
-                }
-            })
-            .error((error) => { console.error('Echo Subscription Error:', error); });
+        const handleMessage = (event) => {
+            const message = event.detail;
+            if (message.senderId === friend.id) {
+                setAllMessages((prev) => [...prev, message]);
+            }
+        };
 
-        return () => { window.Echo.leave(`chat.${user.id}`); };
-    }, [user?.id, friend.id]);
+        window.addEventListener('chat-message', handleMessage);
+
+        return () => {
+            window.removeEventListener('chat-message', handleMessage);
+        };
+    }, [friend.id]);
+
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            // Setup Audio Context for Visualizer
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+            analyser.fftSize = 256;
+            
+            audioContextRef.current = audioContext;
+            analyserRef.current = analyser;
+            
+            // Setup Media Recorder
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+            isCancelledRef.current = false;
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                // Stop visualizer
+                if (animationRef.current) cancelAnimationFrame(animationRef.current);
+                if (audioContextRef.current) audioContextRef.current.close();
+
+                // Stop all tracks to release microphone
+                stream.getTracks().forEach(track => track.stop());
+
+                if (!isCancelledRef.current) {
+                    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                    // Only send if we have data (avoid empty files)
+                    if (audioBlob.size > 0) {
+                        const audioFile = new File([audioBlob], "voice_message.webm", { type: 'audio/webm' });
+                        sendAudioMessage(audioFile);
+                    }
+                }
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+            drawVisualizer();
+        } catch (error) {
+            console.error("Error accessing microphone:", error);
+            alert("Could not access microphone. Please ensure permissions are granted.");
+        }
+    };
+
+    const drawVisualizer = () => {
+        if (!canvasRef.current || !analyserRef.current) return;
+
+        const canvas = canvasRef.current;
+        const canvasCtx = canvas.getContext("2d");
+        const analyser = analyserRef.current;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        const draw = () => {
+            animationRef.current = requestAnimationFrame(draw);
+            analyser.getByteFrequencyData(dataArray);
+
+            canvasCtx.fillStyle = 'rgb(255, 255, 255)'; // Clear with background color (or transparent)
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = (canvas.width / bufferLength) * 2.5;
+            let barHeight;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = dataArray[i] / 2;
+
+                // Create gradient or color based on volume
+                canvasCtx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+                canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+
+                x += barWidth + 1;
+            }
+        };
+
+        draw();
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
+    
+    const cancelRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            isCancelledRef.current = true;
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
+
+    const sendAudioMessage = (audioFile) => {
+        setIsSending(true);
+        
+        const formData = new FormData();
+        formData.append("senderId", user.id);
+        formData.append("receiverId", friend.id);
+        formData.append("audio", audioFile);
+
+        // Optimistic update (placeholder)
+        const tempId = Date.now();
+        const optimisticMessage = { 
+            id: tempId, 
+            senderId: user.id, 
+            receiverId: friend.id, 
+            message: null,
+            audio_path: URL.createObjectURL(audioFile), // Temporary blob URL
+            created_at: new Date().toISOString() 
+        };
+        
+        setAllMessages(prev => [...prev, optimisticMessage]);
+
+        router.post(route("chat.store"), formData, {
+            onSuccess: () => {
+                setIsSending(false);
+            },
+            onError: () => {
+                setIsSending(false);
+                setAllMessages(prev => prev.filter(m => m.id !== tempId));
+            },
+            preserveScroll: true,
+            forceFormData: true,
+        });
+    };
 
     const sendMessage = (e) => {
         e.preventDefault();
@@ -85,10 +225,10 @@ export default function Messages({ user, messages, friend }) {
                 {/* Chat Header */}
                 <div className="flex items-center justify-between p-4 border-b bg-card z-10">
                     <div className="flex items-center gap-3">
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="md:hidden" 
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="md:hidden"
                             onClick={() => window.history.back()}
                         >
                             <ArrowLeft className="h-5 w-5" />
@@ -123,8 +263,8 @@ export default function Messages({ user, messages, friend }) {
                     {allMessages.map((msg, index) => {
                         const isMe = msg.senderId === user.id;
                         return (
-                            <div 
-                                key={msg.id || index} 
+                            <div
+                                key={msg.id || index}
                                 className={cn(
                                     "flex w-full",
                                     isMe ? "justify-end" : "justify-start"
@@ -140,14 +280,18 @@ export default function Messages({ user, messages, friend }) {
                                             <AvatarFallback>{friend.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                     )}
-                                    
+
                                     <div className={cn(
                                         "p-3 rounded-2xl text-sm shadow-sm",
-                                        isMe 
-                                            ? "bg-primary text-primary-foreground rounded-br-none" 
+                                        isMe
+                                            ? "bg-primary text-primary-foreground rounded-br-none"
                                             : "bg-card text-card-foreground border rounded-bl-none"
                                     )}>
-                                        <p>{msg.message}</p>
+                                        {msg.audio_path ? (
+                                            <AudioPlayer src={msg.audio_path} className={isMe ? "text-primary-foreground" : ""} />
+                                        ) : (
+                                            <p>{msg.message}</p>
+                                        )}
                                         <p className={cn(
                                             "text-[10px] mt-1 opacity-70 text-right",
                                             isMe ? "text-primary-foreground" : "text-muted-foreground"
@@ -165,25 +309,66 @@ export default function Messages({ user, messages, friend }) {
                 {/* Input Area */}
                 <div className="p-4 bg-card border-t">
                     <form onSubmit={sendMessage} className="flex items-end gap-2">
-                        <Input
-                            value={messageInput}
-                            onChange={(e) => setMessageInput(e.target.value)}
-                            placeholder="Type a message..."
-                            className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary min-h-[44px]"
-                            autoFocus
-                        />
-                        <Button 
-                            type="submit" 
-                            size="icon" 
-                            disabled={!messageInput.trim() || isSending}
-                            className="h-11 w-11 rounded-full shadow-md shrink-0"
-                        >
-                            {isSending ? (
-                                <Loader2 className="h-5 w-5 animate-spin" />
-                            ) : (
-                                <Send className="h-5 w-5 ml-0.5" />
-                            )}
-                        </Button>
+                        {isRecording ? (
+                            <div className="flex-1 flex items-center gap-2 bg-muted/50 rounded-md px-3 h-[44px] border border-red-200 animate-in fade-in duration-300">
+                                <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+                                <span className="text-xs font-medium text-red-500 w-12">Rec</span>
+                                <canvas 
+                                    ref={canvasRef} 
+                                    className="flex-1 h-8 w-full"
+                                    width={300}
+                                    height={50}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={cancelRecording}
+                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        ) : (
+                            <Input
+                                value={messageInput}
+                                onChange={(e) => setMessageInput(e.target.value)}
+                                placeholder="Type a message..."
+                                className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary min-h-[44px]"
+                                autoFocus
+                            />
+                        )}
+                        
+                        {messageInput.trim() ? (
+                            <Button
+                                type="submit"
+                                size="icon"
+                                disabled={isSending}
+                                className="h-11 w-11 rounded-full shadow-md shrink-0"
+                            >
+                                {isSending ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                    <Send className="h-5 w-5 ml-0.5" />
+                                )}
+                            </Button>
+                        ) : (
+                            <Button
+                                type="button"
+                                size="icon"
+                                onClick={isRecording ? stopRecording : startRecording}
+                                className={cn(
+                                    "h-11 w-11 rounded-full shadow-md shrink-0 transition-all duration-300",
+                                    isRecording ? "bg-red-500 hover:bg-red-600" : ""
+                                )}
+                            >
+                                {isRecording ? (
+                                    <Send className="h-5 w-5 fill-current" />
+                                ) : (
+                                    <Mic className="h-5 w-5" />
+                                )}
+                            </Button>
+                        )}
                     </form>
                 </div>
             </div>

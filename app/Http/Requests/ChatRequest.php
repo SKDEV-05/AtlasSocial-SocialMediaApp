@@ -24,7 +24,8 @@ class ChatRequest extends FormRequest
         return [
             "senderId"=>"required|exists:users,id",
             "receiverId"=>"required|exists:users,id",
-            "message"=>"required",
+            "message"=>"nullable|string",
+            "audio"=>"nullable|file|mimes:audio/mpeg,mpga,mp3,wav,aac,ogg,webm|max:10240", // 10MB max
         ];
     }
 }

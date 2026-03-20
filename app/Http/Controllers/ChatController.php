@@ -65,14 +65,19 @@ class ChatController extends Controller
      */
     public function store(ChatRequest $request)
     {
-
         $messageData = $request->validated();
+
+        if ($request->hasFile('audio')) {
+            $path = $request->file('audio')->store('chat_audio', 'public');
+            $messageData['audio_path'] = '/storage/' . $path;
+        }
+
         $message = Chat::create($messageData);
         $receiverId = $message->receiverId;
         $senderId = $message->senderId;
 
 
-            broadcast(new SendMessage($message))->toOthers();
+            broadcast(new SendMessage($message));
 
 
 

@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu"
 import { cn } from '@/lib/utils';
+import EditPost from './EditPost';
 
 export default function PostCard({ post }) {
     const { auth } = usePage().props;
@@ -24,6 +25,7 @@ export default function PostCard({ post }) {
     const [showComments, setShowComments] = useState(false);
     const [comment, setComment] = useState("");
     const [comments, setComments] = useState(post?.comments || []);
+    const [isEditing, setIsEditing] = useState(false);
 
     // Update local state when prop changes (e.g., after a re-fetch)
     React.useEffect(() => {
@@ -70,12 +72,21 @@ export default function PostCard({ post }) {
         });
     };
 
+    const handleDelete = () => {
+        if (confirm('Are you sure you want to delete this post?')) {
+            router.delete(route('posts.destroy', post.id), {
+                preserveScroll: true,
+            });
+        }
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
         >
+            <EditPost post={post} open={isEditing} onOpenChange={setIsEditing} />
             <Card className="mb-6 overflow-hidden border-border/50 shadow-sm hover:shadow-md transition-shadow duration-300">
                 <CardHeader className="flex flex-row items-center gap-4 p-4 pb-2 space-y-0">
                     <Avatar>
@@ -88,19 +99,27 @@ export default function PostCard({ post }) {
                             {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                         </p>
                     </div>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Report</DropdownMenuItem>
-                            {auth.user.id === post.user.id && (
-                                <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                            )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    {(post.can?.update || post.can?.delete) && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {post.can?.update && (
+                                    <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                                        Edit
+                                    </DropdownMenuItem>
+                                )}
+                                {post.can?.delete && (
+                                    <DropdownMenuItem className="text-destructive" onClick={handleDelete}>
+                                        Delete
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </CardHeader>
                 
                 <CardContent className="p-4 pt-2">

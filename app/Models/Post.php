@@ -19,4 +19,8 @@ class Post extends Model
     public function comments(){
         return $this->hasMany(Comment::class,"postId");
     }
+
+    public function auditLogs(){
+        return $this->hasMany(PostAuditLog::class);
+    }
 }

@@ -1,101 +1,105 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🌐 ChatApp: Modern Social & Messaging Platform
 
-## Design System & UI Overhaul
+A premium, full-featured web application combining **Real-time Messaging**, a **Social Media Feed**, and an immersive **Video Reels** experience. Built with a focus on high-end aesthetics, accessibility, and modern technology.
 
-This application has been redesigned with a modern, premium UI/UX using Tailwind CSS and a custom component library.
+---
 
-### 🎨 Design System
+## ✨ Key Features
 
-The design system is built on top of Tailwind CSS and uses CSS variables for theming.
+### 💬 Real-time Messaging
+- **Instant Chat:** Powered by **Laravel Reverb** (WebSockets) for ultra-low latency messaging.
+- **Presence Indicators:** See when friends are active.
+- **Unread Counters:** Stay updated with message notifications.
+- **Audio Alerts:** Custom notification sounds for incoming messages.
 
-**Location:**
--   **Tokens:** `resources/css/app.css` (CSS Variables)
--   **Config:** `tailwind.config.js`
--   **Components:** `resources/js/Components/ui`
+### 🍱 Social Media Feed
+- **Post Interaction:** Create, Like, Dislike, and Comment on posts.
+- **Rich Media Support:** Supports image and video posts with modern card designs.
+- **Engagement:** Real-time updates for likes and comments.
 
-### 🌗 Light & Dark Mode
+### 🎥 Video Reels (Pexels Integration)
+- **Automated Content:** Fetches high-quality popular videos directly from the **Pexels API**.
+- **Premium Experience:** Integrated with **Plyr.io** for a high-end, responsive video player.
+- **Seamless Navigation:** Smart keyboard navigation (Up/Down) and custom "Reels-style" controls.
+- **HD Quality:** Automatically prioritizes HD streams for visual excellence.
 
-The application supports both light and dark modes. The theme preference is saved in `localStorage`.
+### 🛡️ Admin & Dashboard
+- **Admin Panel:** Powerful moderation tools for posts and users.
+- **Profile Management:** Fully customizable user profiles with personalized avatars and themes.
+- **Analytics:** Dashboard overview of activity.
 
--   **Toggle:** Use the sun/moon icon in the sidebar (desktop) or header (mobile).
--   **Implementation:** The `ThemeToggle` component toggles the `dark` class on the `<html>` element.
+### 🌗 Premium UI/UX
+- **Design System:** Built on a custom token-based architecture using **Shadcn UI** and **Radix UI**.
+- **Dark/Light Mode:** Full native support for theme toggling with persistent preferences.
+- **Glassmorphism:** Elegant use of blur effects and gradients for a state-of-the-art look.
 
-### 🧩 Components
+---
 
-Reusable components are located in `resources/js/Components/ui`. They are built using Radix UI primitives for accessibility and Tailwind CSS for styling.
+## 🚀 Tech Stack
 
-**Key Components:**
--   `Button`: Supports variants (default, secondary, destructive, outline, ghost, link, premium).
--   `Input`: Modern input fields with focus states.
--   `Card`: Container for content.
--   `Avatar`: User profile images with fallbacks.
--   `Badge`: Status indicators.
--   `Dialog`: Accessible modals.
--   `DropdownMenu`: Accessible dropdowns.
+### Backend
+- **Framework:** [Laravel 11](https://laravel.com)
+- **Real-time:** [Laravel Reverb](https://reverb.laravel.com) & Laravel Echo
+- **Broadcasting:** WebSocket-based event system
+- **Database:** SQLite (Default) / PostgreSQL / MySQL
+- **HTTP Client:** Guzzle/Laravel Http for Pexels API integration
 
-### 🛠️ Customization
+### Frontend
+- **Framework:** [React 18](https://reactjs.org) + [Inertia.js](https://inertiajs.com)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com) + Framer Motion
+- **UI Components:** [Shadcn UI](https://ui.shadcn.com)
+- **Icons:** [Lucide-React](https://lucide.dev)
+- **Video Player:** [Plyr.io](https://plyr.io) via `plyr-react`
+- **Build Tool:** Vite
 
-To override design tokens, edit `resources/css/app.css`.
+---
 
-Example:
-```css
-:root {
-  --primary: 221.2 83.2% 53.3%; /* Hue Saturation Lightness */
-  --radius: 0.75rem; /* Border Radius */
-}
-```
+## 🛠️ Installation
 
-### 📖 Showcase
+### Prerequisites
+- **PHP 8.2+** & **Composer**
+- **Node.js 18+** & **npm**
 
-Visit `/design-system` (requires login) to view the component showcase and design system documentation.
+### Setup Steps
+1. **Clone the repository:**
+   ```bash
+   git clone <repo-url>
+   cd chat-app
+   ```
+2. **Install Dependencies:**
+   ```bash
+   composer install
+   npm install
+   ```
+3. **Configure Environment:**
+   Copy `.env.example` to `.env` and configure your database and Pexels API key:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+   *Make sure to add your `PEXELS_API_KEY` to the `.env` file.*
 
-## About Laravel
+4. **Run Migrations:**
+   ```bash
+   php artisan migrate
+   ```
+5. **Start Servers:**
+   - **Frontend/Vite:** `npm run dev`
+   - **Backend:** `php artisan serve`
+   - **WebSocket (Reverb):** `php artisan reverb:start`
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📖 Directory Structure
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- `app/Http/Controllers/` - Core business logic (Chat, Videos, Posts).
+- `resources/js/Pages/` - React pages (Inertia views).
+- `resources/js/Layouts/` - Shared layouts for Authenticated & Public states.
+- `resources/js/Components/ui/` - Custom design system components.
+- `routes/web.php` - Application routing.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 📜 License
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT). This application is built for performance and security.

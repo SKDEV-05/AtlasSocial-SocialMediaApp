@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutDashboard, MessageCircle, Users, Newspaper, Menu, X, Bell, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, MessageCircle, Users, Newspaper, Menu, X, Bell, Settings, LogOut, PlaySquare } from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Button } from '@/Components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/Components/ui/avatar';
@@ -14,18 +14,49 @@ import {
   DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu"
 import { cn } from '@/lib/utils';
+import audio from "../../assets/songs/notification.wav";
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
     const { url } = usePage();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+    // Global Notification Listener
+    useEffect(() => {
+        if (!user?.id) return;
+
+        const notif = new Audio(audio);
+
+        const channel = window.Echo.private(`chat.${user.id}`)
+            .listen(".chat.send", (e) => {
+                const params = new URLSearchParams(window.location.search);
+                const currentFriendId = params.get('friendId');
+
+                // Dispatch custom event so other components can listen
+                window.dispatchEvent(new CustomEvent('chat-message', { detail: e.message }));
+
+                // Play sound if not currently chatting with the sender
+                if (currentFriendId != e.message.senderId) {
+                    notif.play().catch(err => console.error("Audio play failed", err));
+                }
+            });
+
+        return () => {
+            window.Echo.leave(`chat.${user.id}`);
+        };
+    }, [user?.id]);
+
     const navigation = [
         { name: 'Dashboard', href: route('dashboard'), icon: LayoutDashboard, current: route().current('dashboard') },
         { name: 'Chat', href: route('out_conversation'), icon: MessageCircle, current: route().current('out_conversation') || url.startsWith('/chat') },
         { name: 'Feed', href: route('posts.index'), icon: Newspaper, current: route().current('posts.index') },
-        { name: 'People', href: route('out_conversation'), icon: Users, current: route().current('users') }, // Assuming users route might be different or same
+        { name: 'Videos', href: route('videos.index'), icon: PlaySquare, current: route().current('videos.index') },
+        { name: 'People', href: route('out_conversation'), icon: Users, current: route().current('users') }, 
     ];
+
+    if (user.isAdmin && route().has('admin.dashboard')) {
+        navigation.push({ name: 'Admin', href: route('admin.dashboard'), icon: Settings, current: route().current('admin.dashboard') });
+    }
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row">
@@ -135,7 +166,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
             {/* Mobile Bottom Navigation */}
             <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur border-t pb-safe">
-                <div className="grid grid-cols-4 h-16">
+                <div className="flex h-16 justify-around items-center">
                     {navigation.map((item) => (
                         <Link
                             key={item.name}

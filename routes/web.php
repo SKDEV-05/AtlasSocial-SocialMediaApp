@@ -7,7 +7,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use function Pest\Laravel\get;
+use App\Http\Controllers\VideosController;
 
 use App\Models\User;
 use App\Models\Post;
@@ -49,8 +49,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post("posts/dislike",[PostController::class, 'unlikePost'])->name('posts.unlike');
     Route::post("posts/comment",[PostController::class, 'addComment'])->name('posts.create_comment');
     Route::get("posts/comment/{post}",[PostController::class, 'getComments'])->name('posts.get_comments');
+    Route::put("/posts/{id}",[PostController::class, 'update'])->name('posts.update');
+    Route::delete("/posts/{id}",[PostController::class, 'destroy'])->name('posts.destroy');
     Route::get('/design-system', function () {
         return Inertia::render('DesignSystem');
     })->name('design-system');
+    Route::get("/videos",[VideosController::class, 'index'])->name('videos.index');
 });
+use App\Http\Controllers\AdminController;
+
+Route::middleware(['auth', 'verified', 'isAdmin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::delete('/posts/{id}', [AdminController::class, 'deletePost'])->name('admin.posts.delete');
+});
+
 require __DIR__.'/auth.php';
