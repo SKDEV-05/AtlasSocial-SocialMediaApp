@@ -1,3 +1,4 @@
+import '@fontsource/sora';
 import '../css/app.css';
 import './bootstrap';
 

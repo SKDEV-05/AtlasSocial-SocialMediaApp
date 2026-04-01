@@ -24,6 +24,7 @@ export default {
             fontFamily: {
                 sans: ['Inter', 'Outfit', ...defaultTheme.fontFamily.sans],
                 display: ['Space Grotesk', ...defaultTheme.fontFamily.sans],
+                sora: ['Sora', ...defaultTheme.fontFamily.sans],
             },
             borderRadius: {
                 lg: 'var(--radius)',

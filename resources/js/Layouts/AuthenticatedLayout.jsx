@@ -5,8 +5,9 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Button } from '@/Components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/Components/ui/avatar';
 import { ThemeToggle } from '@/Components/ThemeToggle';
+import Text from '@/Components/Text';
 import {
-  DropdownMenu,
+    DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -63,10 +64,8 @@ export default function AuthenticatedLayout({ header, children }) {
             {/* Desktop Sidebar */}
             <aside className="hidden md:flex flex-col w-64 border-r bg-card/50 backdrop-blur-xl fixed inset-y-0 z-50 h-full">
                 <div className="p-6 flex items-center gap-2">
-                    <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                        <ApplicationLogo className="h-5 w-5 text-primary-foreground fill-current" />
-                    </div>
-                    <span className="font-bold text-xl tracking-tight">ChatApp</span>
+                    <ApplicationLogo className="h-10 w-10 object-contain" />
+                    <Text className="font-bold text-xl tracking-tight">Twasel</Text>
                 </div>
 
                 <nav className="flex-1 px-4 space-y-2 mt-4">
@@ -136,10 +135,8 @@ export default function AuthenticatedLayout({ header, children }) {
             {/* Mobile Header */}
             <header className="md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b px-4 h-16 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                        <ApplicationLogo className="h-5 w-5 text-primary-foreground fill-current" />
-                    </div>
-                    <span className="font-bold text-lg">ChatApp</span>
+                    <ApplicationLogo className="h-10 w-10 object-contain" />
+                    <Text className="font-bold text-lg">Twasel</Text>
                 </div>
                 <div className="flex items-center gap-2">
                     <ThemeToggle />
