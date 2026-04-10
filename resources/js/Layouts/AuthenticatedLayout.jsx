@@ -65,7 +65,7 @@ export default function AuthenticatedLayout({ header, children }) {
             <aside className="hidden md:flex flex-col w-64 border-r bg-card/50 backdrop-blur-xl fixed inset-y-0 z-50 h-full">
                 <div className="p-6 flex items-center gap-2">
                     <ApplicationLogo className="h-10 w-10 object-contain" />
-                    <Text className="font-bold text-xl tracking-tight">Twasel</Text>
+                    <Text className="font-bold text-xl tracking-tight">Atlas Social</Text>
                 </div>
 
                 <nav className="flex-1 px-4 space-y-2 mt-4">
@@ -86,57 +86,57 @@ export default function AuthenticatedLayout({ header, children }) {
                     ))}
                 </nav>
 
-                <div className="p-4 border-t space-y-4">
-                    <div className="flex items-center justify-between">
-                         <ThemeToggle />
-                         <Button variant="ghost" size="icon" className="rounded-full relative">
-                            <Bell className="h-5 w-5" />
-                            <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full" />
-                         </Button>
-                    </div>
+                <div className="p-4 border-t space-y-3">
+    <div className="flex items-center justify-between">
+        <ThemeToggle />
+        <Button variant="ghost" size="icon" className="rounded-full relative">
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-destructive rounded-full" />
+        </Button>
+    </div>
 
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full justify-start px-2 py-6 hover:bg-accent/50">
-                                <div className="flex items-center gap-3 text-left">
-                                    <Avatar>
-                                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
-                                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1 overflow-hidden">
-                                        <p className="text-sm font-medium truncate">{user.name}</p>
-                                        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                                    </div>
-                                    <Settings className="h-4 w-4 text-muted-foreground" />
-                                </div>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56" align="end" forceMount>
-                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                <Link href={route('profile.edit')} className="cursor-pointer w-full flex items-center">
-                                    <Settings className="mr-2 h-4 w-4" />
-                                    <span>Profile</span>
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                <Link href={route('logout')} method="post" as="button" className="cursor-pointer w-full flex items-center text-destructive focus:text-destructive">
-                                    <LogOut className="mr-2 h-4 w-4" />
-                                    <span>Log out</span>
-                                </Link>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+    <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="w-full justify-start px-2 py-2 h-auto hover:bg-accent/50">
+                <div className="flex items-center gap-3 w-full">
+                    <Avatar className="h-9 w-9 shrink-0">
+                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
+                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col text-left min-w-0 flex-1">
+                        <p className="text-sm font-medium truncate leading-tight">{user.name}</p>
+                        <p className="text-xs text-muted-foreground truncate leading-tight">{user.email}</p>
+                    </div>
+                    <Settings className="h-4 w-4 text-muted-foreground shrink-0" />
                 </div>
+            </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+                <Link href={route('profile.edit')} className="cursor-pointer w-full flex items-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+                <Link href={route('logout')} method="post" as="button" className="cursor-pointer w-full flex items-center text-destructive focus:text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                </Link>
+            </DropdownMenuItem>
+        </DropdownMenuContent>
+    </DropdownMenu>
+</div>
             </aside>
 
             {/* Mobile Header */}
             <header className="md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b px-4 h-16 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <ApplicationLogo className="h-10 w-10 object-contain" />
-                    <Text className="font-bold text-lg">Twasel</Text>
+                    <Text className="font-bold text-lg">Atlas Social</Text>
                 </div>
                 <div className="flex items-center gap-2">
                     <ThemeToggle />

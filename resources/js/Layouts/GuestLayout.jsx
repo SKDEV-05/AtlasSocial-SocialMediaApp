@@ -25,7 +25,7 @@ export default function GuestLayout({ children }) {
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-2">
                         <ApplicationLogo className="w-16 h-16 object-contain" />
-                        <Text className="text-2xl font-black text-white tracking-tight">Twasel</Text>
+                        <Text className="text-2xl font-black text-white tracking-tight">Atlas Social</Text>
                     </div>
                     <p className="text-emerald-200 text-sm font-medium">Connect. Share. Collaborate.</p>
                 </div>
@@ -86,7 +86,7 @@ export default function GuestLayout({ children }) {
                 {/* Mobile Logo */}
                 <div className="lg:hidden mb-8 text-center">
                     <ApplicationLogo className="w-20 h-20 object-contain mx-auto mb-3" />
-                    <Text as="h2" className="text-2xl font-black text-gray-900">Twasel</Text>
+                    <Text as="h2" className="text-2xl font-black text-gray-900">Atlas Social</Text>
                 </div>
 
                 <div className="w-full max-w-md">

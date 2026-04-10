@@ -22,7 +22,7 @@ export default {
         },
         extend: {
             fontFamily: {
-                sans: ['Inter', 'Outfit', ...defaultTheme.fontFamily.sans],
+                sans: ['Sora', 'Inter', 'Outfit', ...defaultTheme.fontFamily.sans],
                 display: ['Space Grotesk', ...defaultTheme.fontFamily.sans],
                 sora: ['Sora', ...defaultTheme.fontFamily.sans],
             },

@@ -1,4 +1,4 @@
-# 🌐 Twasel: Modern Social & Messaging Platform
+# 🌐 Atlas Social: Modern Social & Messaging Platform
 
 A premium, full-featured web application combining **Real-time Messaging**, a **Social Media Feed**, and an immersive **Video Reels** experience. Built with a focus on high-end aesthetics, accessibility, and modern technology.
 

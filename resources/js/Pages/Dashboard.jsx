@@ -38,7 +38,7 @@ export default function Dashboard({ auth, users = [], posts = [] }) {
                         <div className="space-y-4 max-w-2xl">
                             <div className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white backdrop-blur-md border border-white/20">
                                 <Sparkles className="mr-2 h-4 w-4 text-yellow-300" />
-                                <span>Welcome back to Twasel</span>
+                                <span>Welcome back to Atlas Social</span>
                             </div>
                             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
                                 {greeting()}, {auth.user.name}!
