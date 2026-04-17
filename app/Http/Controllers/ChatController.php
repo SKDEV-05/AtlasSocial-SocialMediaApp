@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CallEvent;
 use App\Events\GetNotif;
 use App\Events\GetUsers;
 use App\Events\SendMessage;
@@ -147,5 +148,23 @@ class ChatController extends Controller
     public function out_conversation(){
         auth()->user()->fill(["activeConversation" => null])->save();
         return to_route('users.index');
+    }
+
+    public function triggerCall(Request $request)
+    {
+        $validated = $request->validate([
+            'receiverId' => 'required|exists:users,id',
+            'roomId' => 'required|string',
+            'callType' => 'required|string|in:audio,video',
+        ]);
+
+        broadcast(new CallEvent(
+            auth()->user(),
+            $validated['roomId'],
+            $validated['callType'],
+            $validated['receiverId']
+        ))->toOthers();
+
+        return response()->json(['success' => true]);
     }
 }

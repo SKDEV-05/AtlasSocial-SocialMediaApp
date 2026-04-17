@@ -16,13 +16,18 @@ import {
 } from "@/Components/ui/dropdown-menu"
 import { cn } from '@/lib/utils';
 import audio from "../../assets/songs/notification.wav";
+import VideoCall from '@/Components/Call/VideoCall';
+import CallNotification from '@/Components/Call/CallNotification';
+import axios from 'axios';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
     const { url } = usePage();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [incomingCall, setIncomingCall] = useState(null);
+    const [activeCall, setActiveCall] = useState(null);
 
-    // Global Notification Listener
+    // Global Notification & Call Listener
     useEffect(() => {
         if (!user?.id) return;
 
@@ -33,19 +38,58 @@ export default function AuthenticatedLayout({ header, children }) {
                 const params = new URLSearchParams(window.location.search);
                 const currentFriendId = params.get('friendId');
 
-                // Dispatch custom event so other components can listen
                 window.dispatchEvent(new CustomEvent('chat-message', { detail: e.message }));
 
-                // Play sound if not currently chatting with the sender
                 if (currentFriendId != e.message.senderId) {
                     notif.play().catch(err => console.error("Audio play failed", err));
                 }
+            })
+            .listen(".incoming-call", (e) => {
+                console.log("Incoming call:", e);
+                setIncomingCall(e);
             });
+
+        // Listen for internal call triggers from other components
+        const handleStartCall = (event) => {
+            const { receiverId, callType } = event.detail;
+            const roomId = `room_${Math.min(user.id, receiverId)}_${Math.max(user.id, receiverId)}`;
+            
+            // Trigger call on background
+            axios.post(route('chat.call'), {
+                receiverId: receiverId,
+                roomId: roomId,
+                callType: callType
+            }).catch(err => console.error("Failed to trigger call", err));
+
+            setActiveCall({
+                roomId: roomId,
+                callType: callType,
+                userId: user.id,
+                userName: user.name
+            });
+        };
+
+        window.addEventListener('start-call', handleStartCall);
 
         return () => {
             window.Echo.leave(`chat.${user.id}`);
+            window.removeEventListener('start-call', handleStartCall);
         };
-    }, [user?.id]);
+    }, [user?.id, user?.name]);
+
+    const handleAcceptCall = () => {
+        setActiveCall({
+            roomId: incomingCall.roomId,
+            callType: incomingCall.callType,
+            userId: user.id,
+            userName: user.name
+        });
+        setIncomingCall(null);
+    };
+
+    const handleDeclineCall = () => {
+        setIncomingCall(null);
+    };
 
     const navigation = [
         { name: 'Dashboard', href: route('dashboard'), icon: LayoutDashboard, current: route().current('dashboard') },
@@ -181,6 +225,25 @@ export default function AuthenticatedLayout({ header, children }) {
                     ))}
                 </div>
             </nav>
+
+            {incomingCall && (
+                <CallNotification 
+                    caller={incomingCall.caller} 
+                    callType={incomingCall.callType}
+                    onAccept={handleAcceptCall}
+                    onDecline={handleDeclineCall}
+                />
+            )}
+
+            {activeCall && (
+                <VideoCall 
+                    roomId={activeCall.roomId}
+                    userId={activeCall.userId}
+                    userName={activeCall.userName}
+                    callType={activeCall.callType}
+                    onClose={() => setActiveCall(null)}
+                />
+            )}
         </div>
     );
 }

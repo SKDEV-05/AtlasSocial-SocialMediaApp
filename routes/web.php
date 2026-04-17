@@ -12,6 +12,8 @@ use App\Http\Controllers\VideosController;
 use App\Models\User;
 use App\Models\Post;
 
+Route::get('/test-simple', function() { return "Working"; });
+
 Route::get('/', function () {
 return auth()->check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
@@ -37,6 +39,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
+    Route::post('/chat/call', [ChatController::class, 'triggerCall'])->name('chat.call');
     Route::get("/out_conversation",[ChatController::class,'out_conversation'])->name('out_conversation');
 });
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -246,10 +246,20 @@ export default function Messages({ user, messages, friend }) {
                         </div>
                     </div>
                     <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-muted-foreground hover:text-primary"
+                            onClick={() => window.dispatchEvent(new CustomEvent('start-call', { detail: { receiverId: friend.id, callType: 'audio' } }))}
+                        >
                             <Phone className="h-5 w-5" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-muted-foreground hover:text-primary"
+                            onClick={() => window.dispatchEvent(new CustomEvent('start-call', { detail: { receiverId: friend.id, callType: 'video' } }))}
+                        >
                             <Video className="h-5 w-5" />
                         </Button>
                         <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">

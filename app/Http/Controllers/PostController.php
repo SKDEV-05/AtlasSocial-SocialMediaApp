@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Events\AddPost;
+use App\Events\PostUpdated;
 use App\Http\Requests\CommentRequest;
 use App\Http\Requests\LikeRequest;
 use App\Http\Requests\PostRequest;
@@ -167,6 +168,9 @@ class PostController extends Controller
             'postId' => $post->id,
             'userId' => $userId
         ]);
+
+        $post->load('user', 'comments.user');
+        broadcast(new PostUpdated($post));
         
         return redirect()->back();
     }
@@ -180,6 +184,9 @@ class PostController extends Controller
          if($existingLike){
              $existingLike->delete();
              $post->fill(["likes"=>max(0, $post->likes-1)])->save();
+             
+             $post->load('user', 'comments.user');
+             broadcast(new PostUpdated($post));
          }
          
          return redirect()->back();
@@ -187,7 +194,12 @@ class PostController extends Controller
 
     public function addComment(CommentRequest $request){
         $data = $request->validated();
-        Comment::create($data);
+        $comment = Comment::create($data);
+        
+        $post = Post::findOrFail($data['postId']);
+        $post->load('user', 'comments.user');
+        broadcast(new PostUpdated($post));
+
         return redirect()->back();
     }
 

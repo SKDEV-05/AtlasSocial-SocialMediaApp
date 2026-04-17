@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import Text from '@/Components/Text';
 import ApplicationLogo from '@/Components/ApplicationLogo';
+import { ChatBubbleIcon, CameraIcon, BellIcon } from '@radix-ui/react-icons';
 
 
 export default function GuestLayout({ children }) {
@@ -51,12 +52,12 @@ export default function GuestLayout({ children }) {
                     {/* Features */}
                     <div className="space-y-4">
                         {[
-                            { icon: '💬', title: 'Real-time messaging', desc: 'Instant chat with friends' },
-                            { icon: '📸', title: 'Share moments', desc: 'Post photos and updates' },
-                            { icon: '🔔', title: 'Smart notifications', desc: 'Never miss a message' },
+                            { icon: <ChatBubbleIcon className="w-5 h-5 text-emerald-300" />, title: 'Real-time messaging', desc: 'Instant chat with friends' },
+                            { icon: <CameraIcon className="w-5 h-5 text-emerald-300" />, title: 'Share moments', desc: 'Post photos and updates' },
+                            { icon: <BellIcon className="w-5 h-5 text-emerald-300" />, title: 'Smart notifications', desc: 'Never miss a message' },
                         ].map((f, i) => (
                             <div key={i} className="flex items-center gap-4 bg-white/8 backdrop-blur-sm rounded-2xl p-4 border border-white/10 hover:bg-white/12 transition-all">
-                                <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                                <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0">
                                     {f.icon}
                                 </div>
                                 <div>
