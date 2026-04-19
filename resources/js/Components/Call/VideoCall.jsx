@@ -69,7 +69,7 @@ const VideoCall = ({ roomId, userId, userName, onClose, callType = 'video' }) =>
                     <div className="max-w-md space-y-4">
                         <h3 className="text-xl font-bold text-destructive">Configuration Requise</h3>
                         <p className="text-muted-foreground">
-                            Veuillez configurer <code className="bg-muted p-1 rounded">VITE_ZEGO_APP_ID</code> et 
+                            Veuillez configurer ! <code className="bg-muted p-1 rounded">VITE_ZEGO_APP_ID</code> et 
                             <code className="bg-muted p-1 rounded ml-1">VITE_ZEGO_SERVER_SECRET</code> dans votre fichier .env pour activer les appels.
                         </p>
                         <Button onClick={onClose}>Fermer</Button>
